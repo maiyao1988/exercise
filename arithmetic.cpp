@@ -238,25 +238,23 @@ float float_add(float a, float b) {
         //对阶后加法,结果直接为0,结果就是0,0是特殊的表达
         return 0;
     }
-
+    int top1Index = 23;
+    unsigned mask = 1 << 31;
     //printf("%x\n", st);
-    
-    
-    //标准化,保证24位总是1,而且是第一个1
-    if ((st & (1 << 23)) == 0){
-        if(st > (1<<23)) {
-            while ((st & (1<<23)) == 0) {
-                st = st >> 1;
-                bigLevel += 1;
-            }
-        }
-        else {
-            while ((st & (1<<23)) == 0) {
-                st = st << 1;
-                bigLevel -= 1;
-            }
+    //标准化,保证24位总是1,而且是最高位
+    //由于24位的加法最多也就到25位,因此右移只需要管25位是否为1即可
+    if (((st>>24) & 1) == 1) {
+        st = st >> 1;
+        bigLevel += 1;
+    }
+    else {
+        //如果24位不为1,则必然小于1<<23
+        while (st < (1 << 23)) {
+            st = st << 1;
+            bigLevel -= 1;
         }
     }
+    
     //printf("%x\n", st);
 
     st = st << 9 >> 9;
@@ -287,7 +285,7 @@ unsigned int mul_para(unsigned a, unsigned b, unsigned n) {
 int main()
 {
     
-    float r = float_add(1.1, 0.5);
+    float r = float_add(1.1, 1.5);
     //dump_float(r);
     printf("%.7f\n", r);
     
